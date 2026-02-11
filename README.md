@@ -142,9 +142,3 @@ MIT License
 
 If you use PaperMind in your research, please cite:
 
-```
-@software{papermind2026,
-  title={PaperMind: Multi-Agent Research System for arXiv Papers},
-  year={2026}
-}
-```
