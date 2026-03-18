@@ -8,8 +8,6 @@ PaperMind ingests arXiv papers, processes them into a vector database, and emplo
 
 ## Architecture
 
-The system consists of:
-
 - **Ingestion Pipeline**: arXiv API integration, PDF parsing, text chunking, and embedding generation
 - **Vector Store**: FAISS-based similarity search over paper chunks
 - **MCP Controller**: Multi-agent orchestration system coordinating specialized research agents
