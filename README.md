@@ -39,7 +39,6 @@ OPENAI_API_KEY=your_key_here
 
 Alternatively, the system will fall back to SentenceTransformers for local embedding generation if no API key is provided.
 
-## Usage
 
 ### Command Line
 
