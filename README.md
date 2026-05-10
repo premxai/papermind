@@ -13,7 +13,7 @@ PaperMind ingests arXiv papers, processes them into a vector database, and emplo
 - **MCP Controller**: Multi-agent orchestration system coordinating specialized research agents
 - **Research Agents**: Five domain-specific agents (Literature, Methods, Results, Critique, Synthesis)
 - **API Server**: FastAPI backend exposing ingestion and research endpoints
-- **UI**: Streamlit interface for interactive research
+- **UI**: Streamlit interface for interactive 
 
 ## Installation
 
