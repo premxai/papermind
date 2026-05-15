@@ -34,8 +34,15 @@ class MCPController:
         self.memory = Memory()
         
         api_key = api_key or os.getenv("OPENAI_API_KEY")
-        self.client = OpenAI(api_key=api_key)
         
+        # If API key is provided, setup OpenAI client, otherwise leave None
+        if api_key:
+            self.client = OpenAI(api_key=api_key)
+            self.llm_model = llm_model
+        else:
+            self.client = None
+            self.llm_model = None
+
         self.agents = {}
     
     def register_agent(self, name: str, agent):
@@ -73,8 +80,19 @@ class MCPController:
             raise ValueError(f"Agent {agent_name} not registered")
         
         agent = self.agents[agent_name]
-        result = agent.execute(query, context, self.client, self.llm_model)
         
+        if self.client is None:
+            # Fallback to local mock response if no API key
+            import logging
+            logging.warning("No OpenAI API key provided. Using mock fallback for agents.")
+            result = {
+                'agent': agent_name,
+                'analysis': f"[Mock] Analysis from {agent_name} for query: {query}. Please set OPENAI_API_KEY for real results.",
+                'sources_used': len(set([c.get('paper_id') for c in context if c.get('paper_id')]))
+            }
+        else:
+            result = agent.execute(query, context, self.client, self.llm_model)
+
         self.memory.add_agent_result(agent_name, result)
         return result
     

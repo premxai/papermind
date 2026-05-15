@@ -1,10 +1,11 @@
 import streamlit as st
 import requests
 import json
+import os
 from typing import Dict
 
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 
 st.set_page_config(
