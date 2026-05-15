@@ -47,8 +47,32 @@ class ArxivLoader:
             'sortOrder': 'descending'
         }
         
-        response = requests.get(self.BASE_URL, params=params)
-        response.raise_for_status()
+        max_retries = 5
+        base_delay = 2
+
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(self.BASE_URL, params=params)
+                response.raise_for_status()
+                break
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 429 and attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Rate limited by arXiv API. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                elif attempt < max_retries - 1 and response.status_code in [500, 502, 503, 504]:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Server error from arXiv API. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise e
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Connection error: {e}. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise e
         
         papers = self._parse_response(response.text)
         
@@ -103,10 +127,33 @@ class ArxivLoader:
         if os.path.exists(local_path):
             return local_path
         
-        time.sleep(1)
+        max_retries = 5
+        base_delay = 2
         
-        response = requests.get(pdf_url)
-        response.raise_for_status()
+        for attempt in range(max_retries):
+            try:
+                time.sleep(3)  # Be nice to arXiv, they require 3 seconds between downloads
+                response = requests.get(pdf_url)
+                response.raise_for_status()
+                break
+            except requests.exceptions.HTTPError as e:
+                if response.status_code == 429 and attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Rate limited by arXiv PDF server. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                elif attempt < max_retries - 1 and response.status_code in [403, 500, 502, 503, 504]:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Server error or forbidden. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise e
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    print(f"Connection error: {e}. Retrying in {delay} seconds...")
+                    time.sleep(delay)
+                else:
+                    raise e
         
         with open(local_path, 'wb') as f:
             f.write(response.content)
